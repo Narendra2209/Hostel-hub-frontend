@@ -1,0 +1,68 @@
+name: CI
+
+# Typecheck, lint, test and build the SPA on every pull request and every push
+# to main. The API contract in shared/ is a copy of the backend's; the drift
+# check runs too, and skips harmlessly when the backend is not checked out.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push supersedes an in-flight run of the same branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Every date the app renders is resolved in Asia/Kolkata rather than the
+      # host's zone; a UTC runner is the honest test of that.
+      - name: Build the shared contract
+        run: npm run build:shared
+        env:
+          TZ: UTC
+
+      - name: Check the shared contract has not drifted
+        run: npm run check:shared
+
+      - name: Typecheck
+        run: npx tsc -b --emitDeclarationOnly false --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npx vitest run
+        env:
+          TZ: UTC
+
+      # VITE_API_BASE_URL is intentionally unset: this bundle is for inspection,
+      # not deployment. The deploy workflow rebuilds with the real value baked in,
+      # because Vite compiles it into the JavaScript.
+      - name: Build
+        run: npx vite build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spa-build
+          path: dist
+          retention-days: 7

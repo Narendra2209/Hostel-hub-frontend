@@ -1,0 +1,1 @@
+export { buildingsApi } from './resources';

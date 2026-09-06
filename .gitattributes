@@ -1,0 +1,8 @@
+# Normalise line endings so the repository is LF regardless of who commits from
+# Windows. Without this, a Windows checkout re-commits every file with CRLF and
+# the next diff is the entire tree.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

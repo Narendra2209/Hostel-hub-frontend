@@ -1,0 +1,531 @@
+/*
+ * Additions to the reference design system.
+ *
+ * Everything here is new UI the original single-file app did not have - a login
+ * screen, a real confirmation modal in place of window.confirm(), loading
+ * skeletons, pagination and a stacking toast host. It is deliberately additive:
+ * nothing in app.css is overridden, and every colour comes from the same
+ * variables so the new pieces look like they were always part of the design.
+ */
+
+/* ---------- app-level states ---------- */
+
+.page-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 56px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.page-state b {
+  display: block;
+  color: var(--ink);
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 15px;
+}
+
+.page-state .actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+.error-state {
+  border-color: #e9c7b7;
+}
+
+.error-state b {
+  color: var(--late);
+}
+
+/* ---------- skeletons ---------- */
+
+.skel {
+  display: block;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #eef2f4 25%, #e2e8ec 37%, #eef2f4 63%);
+  background-size: 400% 100%;
+  animation: skel-shimmer 1.3s ease-in-out infinite;
+}
+
+.skel + .skel {
+  margin-top: 8px;
+}
+
+.skel.line {
+  height: 12px;
+}
+
+.skel.tall {
+  height: 23px;
+}
+
+.skel.block {
+  height: 96px;
+}
+
+@keyframes skel-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+  }
+}
+
+/* A spinner small enough to sit inside a button while a mutation runs. */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -1px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- modal / confirm dialog ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 20, 26, 0.55);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fade-in 0.15s ease-out;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: var(--r);
+  border: 1px solid var(--rule);
+  box-shadow: 0 20px 60px -20px rgba(12, 20, 26, 0.6);
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow: auto;
+  animation: modal-rise 0.16s ease-out;
+}
+
+.modal.wide {
+  max-width: 640px;
+}
+
+.modal-h {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.modal-h h2 {
+  font-size: 15.5px;
+}
+
+.modal-h .spacer {
+  flex: 1;
+}
+
+.modal-body {
+  padding: 16px 18px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.modal-body strong {
+  color: var(--ink);
+}
+
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 13px 18px;
+  border-top: 1px solid var(--rule-soft);
+  background: #f7fafb;
+  border-radius: 0 0 var(--r) var(--r);
+}
+
+.icon-btn {
+  all: unset;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.icon-btn:hover {
+  background: #f2f6f7;
+  color: var(--ink);
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---------- toast stack ---------- */
+
+.toast-host {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-item {
+  background: var(--ink);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  max-width: min(90vw, 460px);
+  animation: toast-in 0.2s ease-out;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast-item.error {
+  background: var(--late);
+}
+
+.toast-item.leaving {
+  animation: toast-out 0.2s ease-in forwards;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- pagination ---------- */
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-top: 1px solid var(--rule-soft);
+  flex-wrap: wrap;
+}
+
+.pager .spacer {
+  flex: 1;
+}
+
+.pager .pages {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pager .pages button {
+  all: unset;
+  cursor: pointer;
+  min-width: 27px;
+  height: 27px;
+  padding: 0 7px;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.pager .pages button:hover:not([disabled]) {
+  background: #f2f6f7;
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.pager .pages button.on {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+  font-weight: 600;
+}
+
+.pager .pages button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pager .gap {
+  color: var(--muted);
+  padding: 0 2px;
+  font-size: 12px;
+}
+
+/* ---------- filter bar ---------- */
+
+.filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.filters .search {
+  flex: 1;
+  min-width: 170px;
+  max-width: 320px;
+}
+
+.filters select {
+  width: auto;
+  min-width: 130px;
+}
+
+/* ---------- form validation ---------- */
+
+.field .err {
+  font-size: 11.5px;
+  color: var(--late);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.field input[aria-invalid='true'],
+.field select[aria-invalid='true'],
+.field textarea[aria-invalid='true'] {
+  border-color: var(--late);
+}
+
+.field input[aria-invalid='true']:focus,
+.field select[aria-invalid='true']:focus {
+  outline-color: var(--late);
+}
+
+.form-error {
+  margin: 0 16px 14px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  background: #fbebe4;
+  color: var(--late);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+/* ---------- login ---------- */
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--paper);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.login-card .brand-block {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-card .brand-block .mark {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 800;
+  font-size: 25px;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.login-card .brand-block .sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+
+.login-card .formgrid {
+  grid-template-columns: 1fr;
+}
+
+.login-card .actions .btn {
+  width: 100%;
+}
+
+/* ---------- misc ---------- */
+
+.inline-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7c93a0;
+  font-weight: 600;
+}
+
+.rail-user {
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rail-user .who {
+  font-size: 12.5px;
+  color: #dce5ea;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-user button {
+  all: unset;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: #7c93a0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  width: fit-content;
+}
+
+.rail-user button:hover {
+  color: #fff;
+}
+
+.rail-user button:focus-visible {
+  outline: 2px solid #6fd0d8;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The reference hid .btn when printing; keep report actions out of print but
+   let printed tables keep their chips and bars. */
+@media print {
+  .modal-backdrop,
+  .toast-host,
+  .pager,
+  .filters {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .rail-user {
+    margin-left: auto;
+    align-items: flex-end;
+  }
+
+  .filters .search {
+    max-width: none;
+  }
+}
+
+/* ---------- layout overflow correction ---------- */
+
+/*
+ * Grid and flex children default to `min-width: auto`, which means a wide table
+ * refuses to shrink below its content width and pushes its track wider than the
+ * viewport - the page then scrolls horizontally instead of the table scrolling
+ * inside its own `.tablescroll`. Allowing these containers to shrink restores
+ * the intended behaviour: the page never scrolls sideways, wide tables do.
+ *
+ * This lives here rather than in app.css so the reference stylesheet stays a
+ * faithful copy of the original.
+ */
+.grid2 > *,
+.profile > *,
+.stack,
+.stack > *,
+.card {
+  min-width: 0;
+}
+
+/* Long resident names and notes wrap rather than widening a column. */
+td .name,
+td .sub {
+  overflow-wrap: anywhere;
+}
